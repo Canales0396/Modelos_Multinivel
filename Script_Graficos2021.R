@@ -113,7 +113,7 @@ ECV2021NF %>%
   )+
   theme_tq() +
   labs(
-    title = "Density and box chart for the of spend per stay, 2021.",
+    title = "Density and Box plots for the tourism expenditure,2021.",
     x = "",
     y = "Spend per stay",
   ) +
@@ -144,7 +144,7 @@ ECV2021NF %>%
   )+
   theme_tq() +
   labs(
-    title = "Graph of densities and boxes of the expenditure per stay.",
+    title = "Density and Box plots for the tourism expenditure per stay.",
     x = "",
     y = "Spend per stay",
     fill = "Zones"
@@ -165,7 +165,7 @@ ECV2021NF %>%
   stat_halfeye(adjust = 0.5, justification = -0.2, .width = 0, point_colour = NA)+
   geom_boxplot(width = 0.12, outlier.color = NA, alpha = 0.7)+
   theme_tq() +
-  labs(title = "Graph of densities and boxes of the expenditure  per stay, logarithmic scale.", 
+  labs(title = "Density and Box plots for the tourism expenditure per stay at \n logarithm scale.", 
        x = "", y = "Logarithm of expenditure", fill = "Zones")+ 
   coord_flip()+
   theme(legend.position = "bottom", plot.title = element_text(hjust = 0.5))+
