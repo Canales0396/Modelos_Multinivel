@@ -2,23 +2,23 @@ data {
   int<lower=0> n; // Number of observations
   int<lower=1> J; // Number of groups
   array[n] int<lower=1, upper=J> group; // Group assignment for each observation
-  //vector[n] y; // Observed log-normal data
-  vector<lower=1e-3>[n] y; // y>0 (Gamma)
+  vector[n] y; // Observed log-normal data
+  //vector<lower=1e-3>[n] y; // y>0 (Gamma)
 }
-//parameters {
-  //real mu;
-  //vector[J] mu_group;
-  //real<lower=0> sigma;
-//
-// Para garantizar solo tener numeros positivos 
 parameters {
-  real<lower=1e-3> mu;
-  vector [J] mu_group;
-  real<lower=1e-3> sigma;
+  real mu;
+  vector[J] mu_group;
+  real<lower=0> sigma;
 }
+// Para garantizar solo tener numeros positivos 
+//parameters {
+  //real<lower=1e-3> mu;
+  //vector [J] mu_group;
+  //real<lower=1e-3> sigma;
+//}
 transformed parameters{
-  vector[J] alpha = fmax(mu_group .* mu_group / sigma, 1e-3);
-  vector[J] beta = fmax(mu_group / sigma, 1e-3);
+  vector[J] alpha = mu_group .* mu_group / sigma;
+  vector[J] beta = mu_group / sigma;
 }
 model {
   // priors
