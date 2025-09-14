@@ -13,13 +13,13 @@ ECV2021$P04.1 = as.character(ECV2021$P04)
 ECV2021$zona <- "Resto del Mundo"
 
 ECV2021$zona[ECV2021$P04.1 %in% c("Estados Unidos de América",
-                                  "México","Canadá")]  <- "Norte-América"
+                                  "México","Canadá")]  <- "Norteamérica"
 
 ECV2021$zona[ECV2021$P04.1 %in% c("El Salvador", "Guatemala", "Nicaragua", "Costa Rica",
-                              "Panamá", "Belice")]  <- "Centro-América"
+                              "Panamá", "Belice")]  <- "Centroamérica"
 
 ECV2021$zona[ECV2021$P04.1 %in% c("Colombia", "Brasil", "Ecuador", "Argentina", "Perú", "Uruguay",
-                              "Bolivia", "Paraguay", "Chile")] <- "Sur-América"
+                              "Bolivia", "Paraguay", "Chile")] <- "Suramérica"
   
 ECV2021$zona[ECV2021$P04.1 %in% c("Islas Caimán", "República Dominicana", 
                                   "Puerto Rico","Cuba")]  <- "Caribe"
@@ -70,6 +70,7 @@ gl2 = as.numeric(glevels2[!is.na(log(GastoTotal))])
 
 ## Niveles combinados
 glevels3 = factor(paste(ECV2021NF$P11_Zona1,ECV2021NF$Procedencia))
+table(glevels3)
 gl3 = as.numeric(glevels3[!is.na(log(GastoTotal))])
 gl3
 
