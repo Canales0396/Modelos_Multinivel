@@ -28,11 +28,12 @@ fit2 <- sm$sample(data = d2, chains = 4, parallel_chains = 4, refresh = 500)
 fit3 <- sm$sample(data = d3, chains = 4, parallel_chains = 4, refresh = 500)
 fit4 <- sm$sample(data = d4, chains = 4, parallel_chains = 4, refresh = 500)
 
+
 fv = fit2$draws(variables = c("mu","mu_group","sigma"),format = "matrix")
 colnames(fv) = c("mu",levels(glevels1),'sigma')
 
 fv1 = fit3$draws(variables = c("mu","mu_group","sigma"),format = "matrix")
-colnames(fv) = c("mu",levels(glevels2),'sigma')
+colnames(fv1) = c("mu",levels(glevels2),'sigma')
 
 fv2 = fit4$draws(variables = c("mu","mu_group","sigma"),format = "matrix")
 colnames(fv2) = c("mu",levels(glevels3),'sigma')
@@ -69,7 +70,7 @@ ppc_dens_overlay_grouped(LogGTN, yrep[sple,], group = glevels3)
 
 # Leave one out modelo multinivel
 print(loo_compare(fit1$loo(), fit2$loo(),fit3$loo(),fit4$loo()),simplify = FALSE)
-
+xtable(print(loo_compare(fit1$loo(), fit2$loo(),fit3$loo(),fit4$loo()),simplify = FALSE))
 ## result = Hierarchical2-zona visitada y Procedencia modelo fit4
 
 # --- Paleta ---
