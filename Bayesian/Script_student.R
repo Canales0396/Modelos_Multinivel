@@ -16,11 +16,11 @@ sm <- cmdstan_model(sf)
 ## Global
 d1 = list(n = length(LogGTN), J = 1, group = rep(1, length(LogGTN)), y = LogGTN)
 ## Zona visitada
-d2 = list(n = length(LogGTN), J = 6, group = gl1, y = LogGTN)
+d2 = list(n = length(LogGTN), J = nlevels(glevels1), group = gl1, y = LogGTN)
 ## Procedencia
-d3 = list(n = length(LogGTN), J = 6, group = gl2, y = LogGTN)
+d3 = list(n = length(LogGTN), J = nlevels(glevels2), group = gl2, y = LogGTN)
 ## Procedencia y Zona
-d4 = list(n = length(LogGTN), J = 33, group = gl3, y = LogGTN)
+d4 = list(n = length(LogGTN), J = nlevels(glevels3), group = gl3, y = LogGTN)
 
 # mcmc para modelo multinivel
 fit1 <- sm$sample(data = d1, chains = 4, parallel_chains = 4, refresh = 500)
