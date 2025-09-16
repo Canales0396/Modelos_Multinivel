@@ -10,7 +10,7 @@ ECV2021 <- data.frame(ECV2021)
 ECV2021$P04.1 = as.character(ECV2021$P04)
 
 ## Zona visitada
-ECV2021$zona <- "Resto del Mundo"
+#ECV2021$zona <- "Resto del Mundo"
 
 ECV2021$zona[ECV2021$P04.1 %in% c("Estados Unidos de América",
                                   "México","Canadá")]  <- "Norteamérica"
@@ -27,13 +27,11 @@ ECV2021$zona[ECV2021$P04.1 %in% c("Islas Caimán", "República Dominicana",
 ECV2021$zona[ECV2021$P04.1 %in% c("España", "Alemania", "Francia", "Italia", "Suiza", "Reino Unido" , 
                               "Países Bajos", "Polonia", "Portugal", "República Checa", "Grecia" ,
                               "Lituania", "Eslovenia", "Austria", "Dinamarca" , "Irlanda", "Noruega",
-                              "Ucrania", "Bélgica","Israel", "Turquía", "Rusia (Federación de)")]  <- "Europa"
+                              "Ucrania", "Bélgica","Israel", "Turquía", "Rusia (Federación de)","Nueva Zelanda")]  <- "Europa"
   
-#ECV2021$zona[ECV2021$P04.1 %in% c("Israel", "Turquía", "Rusia (Federación de)")] <- "Resto del Mundo"
+#ECV2021$zona[ECV2021$P04.1 %in% c("Israel", "Turquía", "Rusia (Federación de)")] 
+####<- "Resto del Mundo"
 
-
-ECV2021$Procedencia <- as.factor(ECV2021$zona)
-table(ECV2021$Procedencia)
 
 ## Filtrado de las variables que se necesitan para la estimación 
 ECV2021N <- subset(ECV2021, select = c(Validas, Mes, Trimestre, Procedencia, CodCiuRes,
@@ -56,6 +54,7 @@ ECV2021NF <- subset(ECV2021N, P11_Zona1 %in% c("Zona Centro","Zona Insular",
                                                "Zona Oriental","Zona Sur"))
 
 
+ECV2021NF<- subset(ECV2021NF, !is.na(Procedencia))
 ## Conversión del Gasto Fin a escala Logarítmica
 GastoTotal= ECV2021NF$PGastoTotal
 LogGTN = na.exclude(log(GastoTotal))
