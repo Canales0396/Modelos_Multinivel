@@ -16,10 +16,14 @@ model {
   mu_group ~ student_t(3, mu, 1);
   
   // Prior for individual-level parameters
-  sigma ~ student_t(5, 0, 10);
+  //sigma ~ student_t(5, 0, 10);
+  // CAMBIO 1: prior más informativa para sigma (antes: student_t(5,0,10) muy laxa)
+  sigma ~ student_t(4, 0, 1);         // o: sigma ~ normal(0,1);  // half-normal implícita por <0>
   
   // Prior for degrees of freedom
-  nu_group ~ gamma(3, 0.1);
+  //nu_group ~ gamma(3, 0.1);
+  // CAMBIO 2 (opción simple, misma forma): gamma que empuja ν hacia valores más altos
+  nu_group ~ gamma(10, 0.5);          // media ≈ 20, var ≈ 40 (evita ν ≈ 2–4 sin evidencia fuerte)
   
   // Likelihood using t-student generalizada
   for (i in 1:n) {
