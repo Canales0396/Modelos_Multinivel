@@ -27,9 +27,9 @@ ECV2021$zona[ECV2021$P04.1 %in% c("Islas Caimán", "República Dominicana",
 ECV2021$zona[ECV2021$P04.1 %in% c("España", "Alemania", "Francia", "Italia", "Suiza", "Reino Unido" , 
                               "Países Bajos", "Polonia", "Portugal", "República Checa", "Grecia" ,
                               "Lituania", "Eslovenia", "Austria", "Dinamarca" , "Irlanda", "Noruega",
-                              "Ucrania", "Bélgica")]  <- "Europa"
+                              "Ucrania", "Bélgica","Israel", "Turquía", "Rusia (Federación de)")]  <- "Europa"
   
-ECV2021$zona[ECV2021$P04.1 %in% c("Israel", "Turquía", "Rusia (Federación de)")] <- "Resto del Mundo"
+#ECV2021$zona[ECV2021$P04.1 %in% c("Israel", "Turquía", "Rusia (Federación de)")] <- "Resto del Mundo"
 
 
 ECV2021$Procedencia <- as.factor(ECV2021$zona)

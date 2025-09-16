@@ -15,30 +15,17 @@ sf <- "~/Documents/Github/Modelos_Multinivel/Stancodes/ML_gamma.stan"
 sm <- cmdstan_model(sf)
 sm <- cmdstan_model(sf, force_recompile = TRUE)
 
-# --------------------------------------
-# 2. Validaciones previas
-# --------------------------------------
-stopifnot(all(GastoTotal > 0))  # Gamma requiere y > 0
 
-# Validar índices de agrupamiento
-stopifnot(length(GastoTotal) == length(gl1))
-stopifnot(all(gl1 >= 1 & gl1 <= 6))
-
-stopifnot(length(GastoTotal) == length(gl2))
-stopifnot(all(gl2 >= 1 & gl2 <= 6))
-
-stopifnot(length(GastoTotal) == length(gl3))
-stopifnot(all(gl3 >= 1 & gl3 <= 34))
 
 
 ## Global
 d1 = list(n = length(GastoTotal), J = 1, group = rep(1, length(GastoTotal)), y = GastoTotal)
 ## Zona visitada
-d2 = list(n = length(GastoTotal), J = 6, group = gl1, y = GastoTotal)
+d2 = list(n = length(GastoTotal), J = nlevels(glevels1), group = gl1, y = GastoTotal)
 ## Procedencia
-d3 = list(n = length(GastoTotal), J = 6, group = gl2, y = GastoTotal)
+d3 = list(n = length(GastoTotal), J = nlevels(glevels2), group = gl2, y = GastoTotal)
 ## Procedencia y Zona
-d4 = list(n = length(GastoTotal), J = 34, group = gl3, y = GastoTotal)
+d4 = list(n = length(GastoTotal), J = nlevels(glevels3), group = gl3, y = GastoTotal)
 
 # mcmc para modelo multinivel
 fit1 <- sm$sample(data = d1, chains = 4, parallel_chains = 4, refresh = 500,adapt_delta = 0.9999, max_treedepth = 15)

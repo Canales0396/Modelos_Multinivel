@@ -14,7 +14,6 @@ model {
   // Prior for group-level parameters using t-student generalizada
   mu ~ normal(0,1);
   mu_group ~ student_t(3, mu, 1);
-  
   // Prior for individual-level parameters
   //sigma ~ student_t(5, 0, 10);
   // CAMBIO 1: prior más informativa para sigma (antes: student_t(5,0,10) muy laxa)

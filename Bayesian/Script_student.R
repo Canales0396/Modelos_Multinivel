@@ -69,17 +69,17 @@ mcmc_combo(fv4[,1:7], gg_theme = theme(legend.position = "none"))
 mcmc_combo(fv4[,8:14])
 g1  = mcmc_combo(fv4[,1:5],  gg_theme = theme(legend.position = "none"))
 g2  = mcmc_combo(fv4[,6:10])
-g3  = mcmc_combo(fv4[,11:15])
+g3  = mcmc_combo(fv4[,11:15],  gg_theme = theme(legend.position = "none"))
 g4  = mcmc_combo(fv4[,16:20])
-g5  = mcmc_combo(fv4[,21:25])
+g5  = mcmc_combo(fv4[,21:25],  gg_theme = theme(legend.position = "none"))
 g6  = mcmc_combo(fv4[,26:30])
-g7  = mcmc_combo(fv4[,31:35])
+g7  = mcmc_combo(fv4[,31:35],  gg_theme = theme(legend.position = "none"))
 g8  = mcmc_combo(fv4[,36:40])
-g9  = mcmc_combo(fv4[,41:45])
+g9  = mcmc_combo(fv4[,41:45],  gg_theme = theme(legend.position = "none"))
 g10 = mcmc_combo(fv4[,46:50])
-g11 = mcmc_combo(fv4[,51:55])
+g11 = mcmc_combo(fv4[,51:55],  gg_theme = theme(legend.position = "none"))
 g12 = mcmc_combo(fv4[,56:60])
-g13 = mcmc_combo(fv4[,61:65])
+g13 = mcmc_combo(fv4[,61:65],  gg_theme = theme(legend.position = "none"))
 g14 = mcmc_combo(fv4[,66:68])
 
 cowplot::plot_grid(g1, g2,ncol = 2, rel_widths = c(1.1, 1.2))
@@ -93,36 +93,79 @@ cowplot::plot_grid(g13, g14, ncol = 2, rel_widths = c(1.1, 1.2))
 ###########################################################
 # Posterior predictive checks
 ###########################################################
-sple = log(sample(1:4000,500))
-yrep = fit4$draws(variables = c("y_rep"),format = "matrix")
-ppc_dens_overlay_grouped(LogGTN, yrep[sple,],group = glevels3) + 
-  labs(title = "Posterior Predictive checks",
-       subtitle = "Modelo student-t multinivel")
+# Muestra aleatoria de simulaciones
+sple = sample(1:4000, 500)
+yrep = fit4$draws(variables = c("y_rep"), format = "matrix")
+
+# Posterior predictive checks agrupados, con escalas libres en el eje Y
+#ppc_dens_overlay_grouped(LogGTN, yrep[sple,], group = glevels3) + 
+ # facet_wrap(~ group, scales = "free_y") +
+  #labs(title = "Posterior Predictive checks",
+   #    subtitle = "Modelo student-t multinivel")
+
+#ppc_dens_overlay_grouped(LogGTN, yrep[sple,], group = glevels3) + 
+ # facet_wrap(~ group, scales = "free") +
+  #labs(title = "Posterior Predictive checks",
+   #    subtitle = "Modelo student-t multinivel")
+
+# Definir niveles a excluir
+excluir <- c("Zona Sur Caribe",
+             "Zona Centro Resto del Mundo",
+             "Zona Occidental Resto del Mundo")
+# Filtrar niveles válidos
+niveles_validos <- setdiff(levels(glevels3), excluir)
+n_glevels3<-factor(glevels3, levels = niveles_validos)
+niveles<-levels(n_glevels3)
+keep1<- n_glevels3 %in% niveles[1:6]
+
+#### PPC1
+ppc_dens_overlay_grouped(
+  LogGTN[keep1],
+  yrep[sple, keep1, drop = FALSE],
+  group = droplevels(n_glevels3[keep1])
+)+ facet_wrap(~ group, scales = "free")  + labs(title = "Posterior Predictive checks",
+         subtitle = "Modelo student-t multinivel")
+
+#### PPC2
+keep2<- n_glevels3 %in% niveles[7:12]
+
+ppc_dens_overlay_grouped(
+  LogGTN[keep2],
+  yrep[sple, keep2, drop = FALSE],
+  group = droplevels(n_glevels3[keep2])
+)+ facet_wrap(~ group, scales = "free")  + labs(title = "Posterior Predictive checks",
+                                                subtitle = "Modelo student-t multinivel")
+
+#### PPC3
+keep3<- n_glevels3 %in% niveles[13:18]
+
+ppc_dens_overlay_grouped(
+  LogGTN[keep3],
+  yrep[sple, keep3, drop = FALSE],
+  group = droplevels(n_glevels3[keep3])
+)+ facet_wrap(~ group, scales = "free")  + labs(title = "Posterior Predictive checks",
+                                                subtitle = "Modelo student-t multinivel")
+#### PPC4
+keep4<- n_glevels3 %in% niveles[19:24]
+
+ppc_dens_overlay_grouped(
+  LogGTN[keep4],
+  yrep[sple, keep4, drop = FALSE],
+  group = droplevels(n_glevels3[keep4])
+)+ facet_wrap(~ group, scales = "free")  + labs(title = "Posterior Predictive checks",
+                                                subtitle = "Modelo student-t multinivel")
+#### PPC5
+keep5<- n_glevels3 %in% niveles[25:30]
+
+ppc_dens_overlay_grouped(
+  LogGTN[keep5],
+  yrep[sple, keep5, drop = FALSE],
+  group = droplevels(n_glevels3[keep5])
+)+ facet_wrap(~ group, scales = "free")  + labs(title = "Posterior Predictive checks",
+                                                subtitle = "Modelo student-t multinivel")
+
 # Leave one out modelo multinivel
 print(loo_compare(fit1$loo(), fit2$loo(), fit3$loo(), fit4$loo()), simplify = FALSE)
 xtable(print(loo_compare(fit1$loo(), fit2$loo(), fit3$loo(), fit4$loo()), simplify = FALSE))
 ## result = Hierarchical2-zona visitada y Procedencia modelo fit4
-
-
-lv   <- levels(glevels3)
-keep <- glevels3 %in% lv[1:2]
-
-ppc_dens_overlay_grouped(
-  LogGTN[keep],
-  yrep[sple, keep, drop = FALSE],
-  group = droplevels(glevels3[keep])
-) + labs(title = "Posterior Predictive checks",
-         subtitle = "Modelo student-t multinivel")
-
-idx  <- !is.na(LogGTN) & !is.na(glevels3)
-y    <- LogGTN[idx]
-grp  <- droplevels(glevels3[idx])
-
-sple <- sample.int(nrow(yrep), 300)  # o 500
-Yrep_log <- log(pmax(yrep[sple, idx, drop = FALSE], .Machine$double.eps))
-
-bayesplot::ppc_dens_overlay_grouped(
-  y, Yrep_log, group = grp,
-  facet_args = list(ncol = 2, nrow = 2, scales = "free_x")  # 4 facetas por página
-) + labs(title="Posterior Predictive checks", subtitle="Modelo t-student multinivel")
 
