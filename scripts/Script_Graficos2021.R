@@ -34,8 +34,9 @@ ECV2021NF %>%
   coord_flip()+
   theme(legend.position = "bottom", plot.title = element_text(hjust = 0.45))+
   theme(text = element_text(family = "Times New Roman"))
+
 ## Grafico por zonas
-ECV2021NF %>% 
+Zona_1<-ECV2021NF %>% 
   filter(P11_Zona1 %in% c("Zona Centro", "Zona Insular", "Zona Norte","Zona Occidental",
                           "Zona Oriental","Zona Sur"),
          PGastoTotal>=200, PGastoTotal<= 5000) %>% 
@@ -71,7 +72,7 @@ library(ggdist)
 
 ## Otro grafico revisar esto
 ## Grafico por zonas gasto logaritmico
-ECV2021NF %>% 
+Zona_log<-ECV2021NF %>% 
   filter(P11_Zona1 %in% c("Zona Centro", "Zona Insular", "Zona Norte","Zona Occidental",
                           "Zona Oriental","Zona Sur"))%>% 
   ggplot(aes(x = factor(P11_Zona1), y =log(PGastoTotal), fill = factor(P11_Zona1)))+
@@ -86,9 +87,11 @@ ECV2021NF %>%
   theme(text = element_text(family = "Times New Roman"))
 
 # Grafico por procedencia del turista
-ECV2021NF %>% 
-  filter(Procedencia %in% c("Caribe", "Centro-América", "Europa", 
-                            "Norte-América", "Resto del Mundo", "Sur-América"),
+ProceGlobal<-
+  
+  ECV2021NF %>% 
+  filter(Procedencia %in% c("Caribe", "Centroamérica", "Europa", 
+                            "Norteamérica", "Suramérica"),
          PGastoTotal>=200, PGastoTotal<= 5000) %>% 
   ggplot(aes(x = factor(Procedencia), y = PGastoTotal, fill = factor(Procedencia)))+
   # add half-violin from {ggdist} package
@@ -109,19 +112,19 @@ ECV2021NF %>%
   )+
   theme_tq() +
   labs(
-    title = "Densidades y Box-plots del gasto turístico por procedencia",
-    x = "Procedencia",
-    y = "Gasto turístico",
-    fill = "Procedencia"
+    title = ,
+    x = "",
+    y = expression(y[ij]),
+    fill = 
   )+ 
   coord_flip()+
   theme(legend.position = "right", plot.title = element_text(hjust = 0.44))+
   theme(text = element_text(family = "Times New Roman"))
 
 # Grafico por procedencia del turista logaritmico
-ECV2021NF %>% 
-  filter(Procedencia %in% c("Caribe", "Centro-América", "Europa", 
-                            "Norte-América", "Resto del Mundo", "Sur-América"),
+ProceLog<-ECV2021NF %>% 
+  filter(Procedencia %in% c("Caribe", "Centroamérica", "Europa", 
+                            "Norteamérica", "Suramérica"),
   ) %>% 
   ggplot(aes(x = factor(Procedencia), y = log(PGastoTotal), fill = factor(Procedencia)))+
   # add half-violin from {ggdist} package
@@ -144,7 +147,7 @@ ECV2021NF %>%
   labs(
     title = "Densidades y Box-plots del gasto turístico por procedencia (escala logaritmica)",
     x = "Procedencia",
-    y = "Logaritmo del gasto",
+    y = expression(log(y[ij])),
     fill = "Procedencia"
   )+ 
   coord_flip()+

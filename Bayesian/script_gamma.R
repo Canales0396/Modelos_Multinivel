@@ -7,61 +7,76 @@ library(ggplot2)
 library(cowplot)
 library(ggthemes)
 
+# Cargar datos
 load("~/Documents/Github/Modelos_Multinivel/Datos/Datos2021.RData")
 source("~/Documents/Github/Modelos_Multinivel/scripts/utils.R")
 
-# Compilar el codigo Stan del modelo multinivel
+# Compilar el modelo Stan (Gamma)
 sf <- "~/Documents/Github/Modelos_Multinivel/Stancodes/ML_gamma.stan"
-sm <- cmdstan_model(sf)
-sm <- cmdstan_model(sf, force_recompile = TRUE)
+sm <- cmdstan_model(sf, force_recompile = TRUE)  # Eliminamos línea redundante
 
+# La lista de datos que Stan necesita para hacer mcmc
 
-
-
-## Global
+## Escenario Global (sin estructura jerárquica)
 d1 = list(n = length(GastoTotal), J = 1, group = rep(1, length(GastoTotal)), y = GastoTotal)
-## Zona visitada
-d2 = list(n = length(GastoTotal), J = nlevels(glevels1), group = gl1, y = GastoTotal)
-## Procedencia
-d3 = list(n = length(GastoTotal), J = nlevels(glevels2), group = gl2, y = GastoTotal)
-## Procedencia y Zona
-d4 = list(n = length(GastoTotal), J = nlevels(glevels3), group = gl3, y = GastoTotal)
 
-# mcmc para modelo multinivel
-fit1 <- sm$sample(data = d1, chains = 4, parallel_chains = 4, refresh = 500,adapt_delta = 0.9999, max_treedepth = 15)
-#fit1.1 <- sm$sample(data = d1, chains = 4, parallel_chains = 4, refresh = 500,adapt_delta = 0.999, max_treedepth = 15)
-#fit1 <- sm$sample(data = d1, chains = 4, parallel_chains = 4, refresh = 500, iter_warmup = 1000, iter_sampling = 1000, adapt_delta = 0.99, max_treedepth = 15)
+## Zona visitada
+d2 = list(n = length(GastoTotal), 
+          J = nlevels(glevels1), 
+          group = as.integer(gl1),  # aseguramos índice numérico
+          y = GastoTotal)
+
+## Procedencia del turista
+d3 = list(n = length(GastoTotal), 
+          J = nlevels(glevels2), 
+          group = as.integer(gl2),  #aseguramos índice numérico
+          y = GastoTotal)
+
+## Zona + Procedencia
+d4 = list(n = length(GastoTotal), 
+          J = nlevels(glevels3), 
+          group = as.integer(gl3),  # aseguramos índice numérico
+          y = GastoTotal)
+
+# Ajustar modelos MCMC para cada escenario
+fit1 <- sm$sample(data = d1, chains = 4, parallel_chains = 4, refresh = 500,
+                  adapt_delta = 0.9999, max_treedepth = 15)  
+
 fit2 <- sm$sample(data = d2, chains = 4, parallel_chains = 4, refresh = 500)
 fit3 <- sm$sample(data = d3, chains = 4, parallel_chains = 4, refresh = 500)
 fit4 <- sm$sample(data = d4, chains = 4, parallel_chains = 4, refresh = 500)
 
-fv = fit4$draws(variables = c("mu","mu_group","sigma","alpha", "beta"),
-              format = "matrix")
-colnames(fv) = c("mu",
-                 paste0("mu_",levels(glevels3)),
-                 paste0("alpha_",levels(glevels3)),
-                 paste("beta_",levels(glevels3)),
-                 'sigma')
+# Extraer cadenas para escenario Global
+fv = fit1$draws(variables = c("mu", "mu_group", "sigma", "alpha", "beta"), format = "matrix")
 
-# resumen de las cadenas
+# Validar orden original antes de renombrar
+print(colnames(fv))
+
+# Resumen estadístico de los parámetros
 summarize_draws(fv)
-xtable(print(summarize_draws(fv),simplify = FALSE, digits = 2))
+xtable(print(summarize_draws(fv), simplify = FALSE, digits = 2))
 
-# graficos de las posteriors multinivel
+# Visualización de posteriori
 color_scheme_set("blue")
-g1 = mcmc_combo(fv[,1:4],gg_theme = theme(legend.position = "none"))
-g2 = mcmc_combo(fv[,c(5:8,20)])
-cowplot::plot_grid(g1,g2,ncol = 2,rel_widths = c(1.1, 1.2))
+g2 <- mcmc_combo(fv[, c("mu_group[1]", "alpha[1]", "beta[1]")])
+g1 <- mcmc_combo(fv[, c("mu", "sigma")], gg_theme = theme(legend.position = "none"))
+cowplot::plot_grid(g1, g2, ncol = 2, rel_widths = c(1.1, 1.2))
 
-###########################################################
-# Posterior predictive checks
-###########################################################
+# -----------------------------------------
+# Posterior Predictive Check (ppc)
+# -----------------------------------------
+sple = sample(1:4000,500)
+yrep = fit1$draws(variables = c("y_rep"), format = "matrix")
+ppc_dens_overlay(GastoTotal, yrep[sple,])
 
-# modelo multinivel normal
-yrep = fit4$draws(variables = c("y_rep"),format = "matrix")
-ppc_dens_overlay_grouped(GastoTotal, yrep, group = glevels3)
 
-# Leave one out modelo multinivel con la distribuci
-print(loo_compare(fit1$loo(), fit2$loo(), fit3$loo(),fit4$loo()),,simplify = FALSE)
-xtable(print(loo_compare(fit1$loo(), fit2$loo(), fit3$loo(),fit4$loo()),,simplify = FALSE,digits=2))
-## result = modelo Global fit1
+# -----------------------------------------
+# Comparación de modelos con LOO
+# -----------------------------------------
+# Ganador Gamma Global
+loo_res <- loo_compare(fit1$loo(), fit2$loo(), fit3$loo(), fit4$loo())
+print(loo_res, simplify = FALSE)
+xtable(print(loo_res, simplify = FALSE, digits = 2))
+
+
+

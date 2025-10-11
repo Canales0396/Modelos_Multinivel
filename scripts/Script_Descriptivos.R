@@ -148,12 +148,14 @@ kurtosis(ECV2021NF$PGastoTotal,na.rm = TRUE)
 ## Resumen de los turisticas de cuantas noches pernotaron en el pais
 summary(ECV2021NF$P10D)
 
+pn<-summarise(ECV2021NF$P10D)
+xtable(print(pn),simplify=FALSE,digits = 2)
 ## Base para identificar los turistas que gastaron arriba y menos de 700 dolares
 
 EGYP11<-subset(ECV2021NF,PGastoTotal > 700)
 EGYP22<-subset(ECV2021NF,PGastoTotal<=700)
 
-## Estadística Descriptivas por Zonas
+## Estadística Descriptivas por procedencia
 resumen_procedencia <- ECV2021NF %>%
   group_by(Procedencia) %>%
   summarise(
@@ -194,3 +196,40 @@ cat("Porcentaje de valores atípicos del gasto:", porcentaje_atipicos, "%\n")
 
 q4 = quantile(ECV2021NF$PGastoTotal, 0.87,na.rm = TRUE)
 q4
+
+########
+## Estadística Descriptivas por Zonas (Gasto logarítmico)
+resumen_zonas_log <- ECV2021NF %>%
+  group_by(P11_Zona1) %>%
+  summarise(
+    q1 = quantile(log(PGastoTotal), 0.25, na.rm = TRUE),
+    Mediana = median(log(PGastoTotal), na.rm = TRUE),
+    DesvEstandar = sd(log(PGastoTotal), na.rm = TRUE),
+    q3 = quantile(log(PGastoTotal), 0.75, na.rm = TRUE),
+    Minimo = min(log(PGastoTotal), na.rm = TRUE),
+    Maximo = max(log(PGastoTotal), na.rm = TRUE),
+    asimetria = skewness(log(PGastoTotal), na.rm = TRUE),
+    Curtosis = kurtosis(log(PGastoTotal), na.rm = TRUE)
+  )
+print(resumen_zonas_log)
+
+## Código LaTeX de la tabla
+## Estadística Descriptivas por Zonas (Gasto logarítmico)
+xtable(print(resumen_zonas_log, simplify = FALSE, digits = 2))
+
+## Estadística Descriptivas por Procedencia (Gasto logarítmico)
+resumen_procedencia_log <- ECV2021NF %>%
+  group_by(Procedencia) %>%
+  summarise(
+    q1 = quantile(log(PGastoTotal), 0.25, na.rm = TRUE),
+    Mediana = median(log(PGastoTotal), na.rm = TRUE),
+    DesvEstandar = sd(log(PGastoTotal), na.rm = TRUE),
+    q3 = quantile(log(PGastoTotal), 0.75, na.rm = TRUE),
+    Minimo = min(log(PGastoTotal), na.rm = TRUE),
+    Maximo = max(log(PGastoTotal), na.rm = TRUE),
+    asimetria = skewness(log(PGastoTotal), na.rm = TRUE),
+    Curtosis = kurtosis(log(PGastoTotal), na.rm = TRUE)
+  )
+print(resumen_procedencia_log)
+## Estadística Descriptivas por Procedencia (Gasto logarítmico)
+xtable(print(resumen_procedencia_log, simplify = FALSE, digits = 2))
