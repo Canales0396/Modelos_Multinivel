@@ -60,11 +60,12 @@ fit4 <- sm4$sample(data = d4_log, chains = 4, parallel_chains = 4,refresh = 500)
 fit5 <- sm5$sample(data = d4_log, chains = 4, parallel_chains = 4,refresh = 500)
 fit5.1 <- sm5$sample(data = d2_log, chains = 4, parallel_chains = 4,refresh = 500) #Zona
 fit5.2 <- sm5$sample(data = d3_log, chains = 4, parallel_chains = 4,refresh = 500) #Procedencia
-fit5.3 <- sm5$sample(data = d3, chains = 4, parallel_chains = 4,refresh = 500) #Procedencia
-fit6 <- sm6$sample(data = d4_log, chains = 4, parallel_chains = 4,refresh = 500)
-fit6.1 <- sm5$sample(data = d1, chains = 4, parallel_chains = 4,refresh = 500)# Global
-fit6.2 <- sm5$sample(data = d2, chains = 4, parallel_chains = 4,refresh = 500)#Zona
-fit6.3 <- sm5$sample(data = d4, chains = 4, parallel_chains = 4,refresh = 500)#Zona
+fit5.3 <- sm5$sample(data = d3, chains = 4, parallel_chains = 4,refresh = 500) #Procedencia_Real
+fit6 <- sm6$sample(data = d4_log, chains = 4, parallel_chains = 4,refresh = 500)#Proce_Zona_log
+fit6.1 <- sm5$sample(data = d1, chains = 4, parallel_chains = 4,refresh = 500)# Global_Real
+fit6.2 <- sm5$sample(data = d2, chains = 4, parallel_chains = 4,refresh = 500)#Zona_Real
+fit6.3 <- sm5$sample(data = d4, chains = 4, parallel_chains = 4,refresh = 500)#Zona_Proce_Real
+fit6.4 <- sm5$sample(data = d1_log, chains = 4, parallel_chains = 4,refresh = 500)#Global_log
 
 ## fit2, y fit6 tienen mal diagnositcos en loo
 fit1$loo()
@@ -89,7 +90,8 @@ loo_final<-loo_compare(fit1$loo(),   # model1: Gamma, Global escala real
 print(loo_final, simplify = FALSE)
 xtable(print(loo_final, simplify = FALSE, digits = 2))
 
-print(loo_compare(fit6.1$loo(), fit6.2$loo(), fit6.3$loo()), simplify = FALSE, digits = 2)
+print(loo_compare(fit6.1$loo(), fit6.2$loo(), fit6.3$loo(),fit6.4$loo()), simplify = FALSE, digits = 2)
+print(loo_compare(fit5$loo(), fit5.1$loo(), fit5.2$loo(),fit6.4$loo()), simplify = FALSE, digits = 2)
 
 fit5$loo()
 ################################################################
