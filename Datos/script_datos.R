@@ -81,7 +81,7 @@ rm(list = ls())
 #               Datos para el 2016
 #####################################################################################
 
-EGYPV2016Turistas <- read.spss("~/Documents/Modelos_Multinivel/Datos/EGYPV 2016 F01 - Turistas.sav")
+EGYPV2016Turistas <- read.spss("~/Documents/Github/Modelos_Multinivel/Datos/EGYPV 2016 F01 - Turistas.sav")
 EGYPV2016Turistas <-data.frame(EGYPV2016Turistas)
 
 ## Filtrado de las variables que se necesitan para la estimación 
@@ -147,3 +147,81 @@ LogGTN = na.exclude(log(GastoTotal))
 # setwd("Modelos_Multinivel/Datos")
 save.image("~/Documents/Modelos_Multinivel/Datos/Datos2021Ingles.RData")
 rm(list = ls())
+
+#####################################################################################
+#               Datos para el 2016 para la regresión 2025
+#####################################################################################
+
+EGYPV2016 <- read.spss("~/Documents/Github/Modelos_Multinivel/Datos/EGYPV 2016 F01 - Turistas.sav")
+EGYPV2016<-data.frame(EGYPV2016)
+EGYPV2016$CodResOMT.1= as.character(EGYPV2016$CodResOMT)
+
+## Zona visitada
+EGYPV2016$Procedencia<- "Resto del Mundo"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1%in% c("Estados Unidos de América",
+                                            "México","Canadá")]  <- "Norteamérica"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1 %in% c("El Salvador", "Guatemala", "Nicaragua", "Costa Rica", 
+                                                   "Panamá", "Belice")] <- "Centroamérica"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1 %in% c("Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Ecuador", 
+                                                   "Paraguay", "Perú", "Uruguay", 
+                                                   "Venezuela (República Bolivariana de)")] <- "Suramérica"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1 %in% c("Alemania", "Austria", "Bélgica", "Dinamarca", "España", "Finlandia", "Francia", 
+                                                   "Irlanda", "Islandia", "Italia", "Lituania", "Luxemburgo", "Noruega", "Países Bajos", 
+                                                   "Polonia", "Portugal", "Reino Unido", "República Checa", "Rumania", 
+                                                   "Rusia (Federación de)", "Suecia", "Suiza", "Eslovenia","Israel")] <- "Europa"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1 %in% c("Cuba", "Dominica", "República Dominicana", "Puerto Rico", 
+                                                   "San Vicente y las Granadinas","Haití")] <- "Caribe"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1 %in% c("China", "Provincia china de Taiwán", "India","Japón", 
+                                                   "Corea del Norte (República Popular Democrática de)", "Corea del Sur (República de)", 
+                                                   "Brunei Darussalam", "Nueva Zelandia","Australia")] <- "Asia"
+
+EGYPV2016$Procedencia[EGYPV2016$CodResOMT.1 %in% c("Congo", "Sudáfrica")] <- "África"
+
+
+## Filtrado de las variables que se necesitan para la estimación 
+EGYPV2016N <- subset(EGYPV2016, select = c(Validas, TipViajero, TipVisitante, Mes, CodRes, RegRes, CodPrimVisita,P29_Mu4,
+                                                    GruViaje, P10_3NumNoch, Pernocto, GruNoch, P11_THoteles, P11_TAmigos,
+                                                    P11_TAlojP, CodTipMot, CodModViaje, P28_Total, CodEstCivil, P9_GruViaje, 
+                                                    P10_Pernocto, GastoTotalXPers, GastoFin, GastoTotalXPersXDia, 
+                                                    Ciudad1, Zona1,Procedencia,CodResOMT.1))
+
+
+EGYPV2016N$P11_THoteles[is.na(EGYPV2016N$P11_THoteles)] <- 0
+EGYPV2016N$P11_TAmigos[is.na(EGYPV2016N$P11_TAmigos)] <- 0
+EGYPV2016N$P11_TAlojP[is.na(EGYPV2016N$P11_TAlojP)] <- 0
+
+ECV2021N$Amigos[is.na(ECV2021N$Amigos)] <- 0
+ECV2021N$CasaP[is.na(ECV2021N$CasaP)] <- 0
+ECV2021N$Ninguno[is.na(ECV2021N$Ninguno)] <- 0
+
+## Filtrado solo para los datos de Gasto y Perfil
+EGYPV2016TNFR <- subset(EGYPV2016TNR,Validas == "Gasto y Perfil")
+## Filtrado solo para todas las zona menos la desconocida
+EGYPV2016TNF2R <- subset(EGYPV2016TNFR, Zona1 %in% c("Zona Centro","Zona Insular",
+                                                   "Zona Norte","Zona Occidental",
+                                                   "Zona Oriental","Zona Sur"))
+
+# Variables adicionales
+GastoFinN = EGYPV2016TNF2R$GastoFin
+glevels = factor(EGYPV2016TNF2R$Zona1)
+
+gl = as.numeric(glevels[!is.na(log(GastoFinN))])
+gl
+LogGFN = na.exclude(log(GastoFinN))
+
+
+
+
+
+
+
+
+
+
+save.image("~/Documents/Modelos_Multinivel/Datos/Datos2016.RData")
