@@ -189,39 +189,115 @@ EGYPV2016N <- subset(EGYPV2016, select = c(Validas, TipViajero, TipVisitante, Me
                                                     GruViaje, P10_3NumNoch, Pernocto, GruNoch, P11_THoteles, P11_TAmigos,
                                                     P11_TAlojP, CodTipMot, CodModViaje, P28_Total, CodEstCivil, P9_GruViaje, 
                                                     P10_Pernocto, GastoTotalXPers, GastoFin, GastoTotalXPersXDia, 
-                                                    Ciudad1, Zona1,Procedencia,CodResOMT.1))
+                                                    Ciudad1, Zona1,Procedencia,CodResOMT.1,ViaEnt, P9_NumPers,
+                                                    P11_TotNoches,CodMotivo,CodAct1,CodEduca,P31_NR,CodIngreso,CodOcupa,TipoAloja,RecuentoGastos))
 
 
 EGYPV2016N$P11_THoteles[is.na(EGYPV2016N$P11_THoteles)] <- 0
 EGYPV2016N$P11_TAmigos[is.na(EGYPV2016N$P11_TAmigos)] <- 0
 EGYPV2016N$P11_TAlojP[is.na(EGYPV2016N$P11_TAlojP)] <- 0
-
-ECV2021N$Amigos[is.na(ECV2021N$Amigos)] <- 0
-ECV2021N$CasaP[is.na(ECV2021N$CasaP)] <- 0
-ECV2021N$Ninguno[is.na(ECV2021N$Ninguno)] <- 0
+names(EGYPV2016N)[names(EGYPV2016N) == "RecuentoGastos"] <- "GruGasto"
 
 ## Filtrado solo para los datos de Gasto y Perfil
-EGYPV2016TNFR <- subset(EGYPV2016TNR,Validas == "Gasto y Perfil")
-## Filtrado solo para todas las zona menos la desconocida
-EGYPV2016TNF2R <- subset(EGYPV2016TNFR, Zona1 %in% c("Zona Centro","Zona Insular",
-                                                   "Zona Norte","Zona Occidental",
-                                                   "Zona Oriental","Zona Sur"))
+EGYPV2016NR<- subset(EGYPV2016N,Validas == "Gasto y Perfil")
+## Filtrado solo para todas las zona menos la desconocida, igual para procedencia 
 
-# Variables adicionales
-GastoFinN = EGYPV2016TNF2R$GastoFin
-glevels = factor(EGYPV2016TNF2R$Zona1)
+EGYPV2016NRF <- subset(EGYPV2016NR, 
+                       Procedencia %in% c("Norteamérica", "Centroamérica", "Suramérica", "Europa", "Caribe") &
+                        Zona1 %in% c("Zona Centro", "Zona Insular", "Zona Norte", "Zona Occidental", "Zona Oriental", "Zona Sur"))
+                       
+#Creaciacion de variables
+EGYPV2016NRF$Trimestre<- "Tri"
+EGYPV2016NRF$Trimestre[EGYPV2016NRF$Mes %in% c("Enero", "Febrero", "Marzo")] <- "Trimestre 1"
+EGYPV2016NRF$Trimestre[EGYPV2016NRF$Mes %in% c("Abril", "Mayo", "Junio")] <- "Trimestre 2"
+EGYPV2016NRF$Trimestre[EGYPV2016NRF$Mes%in% c("Julio", "Agosto", "Septiembre")] <- "Trimestre 3"
+EGYPV2016NRF$Trimestre[EGYPV2016NRF$Mes %in% c("Octubre", "Noviembre", "Diciembre")] <- "Trimestre 4"
 
-gl = as.numeric(glevels[!is.na(log(GastoFinN))])
-gl
-LogGFN = na.exclude(log(GastoFinN))
+#Creacion de variables para identificar si uso hotel o no
+EGYPV2016NRF$Hotel<- ifelse(is.na(EGYPV2016NRF$P11_THoteles), NA,
+                                 ifelse(EGYPV2016NRF$P11_THoteles > 0, 1, 0))
+#Creacion de variables para identificar si uso casa de amigos
+EGYPV2016NRF$Amigos<- ifelse(is.na(EGYPV2016NRF$P11_TAmigos), NA,
+                                 ifelse(EGYPV2016NRF$P11_TAmigos > 0, 1, 0))
+#Creacion de variables para identificar si uso hotel o no
+EGYPV2016NRF$CasaP <- ifelse(is.na(EGYPV2016NRF$P11_TAlojP), NA,
+                                 ifelse(EGYPV2016NRF$P11_TAlojP > 0, 1, 0))
+
+EGYPV2016NRF$HotelUso  <- factor(ifelse(EGYPV2016NRF$Hotel == 1, "Sí",
+                                        ifelse(EGYPV2016NRF$Hotel == 0, "No", NA)),
+                                 levels = c("No", "Sí"))
+
+EGYPV2016NRF$AmigosUso <- factor(ifelse(EGYPV2016NRF$Amigos == 1, "Sí",
+                                        ifelse(EGYPV2016NRF$Amigos == 0, "No", NA)),
+                                 levels = c("No", "Sí"))
+
+EGYPV2016NRF$CasaPUso  <- factor(ifelse(EGYPV2016NRF$CasaP == 1, "Sí",
+                                        ifelse(EGYPV2016NRF$CasaP == 0, "No", NA)),
+                                 levels = c("No", "Sí"))
 
 
+EGYPV2016NRF$gruviaje<- as.numeric(factor(EGYPV2016NRF$GruViaje,
+                                           levels = c("Solo", "Con su pareja", "En familia", "En grupo")))
+EGYPV2016NRF$PrimeraVisita<- as.numeric(factor(EGYPV2016NRF$CodPrimVisita,
+                                          levels = c("Si", "No")))
+EGYPV2016NRF$grunoche <- as.numeric(factor(EGYPV2016NRF$GruNoch,
+                                           levels = c("De 1 a 3 Noches", 
+                                                      "De 4 a 7 Noches", 
+                                                      "De 8 a 10 Noches", 
+                                                      "De 11 a 14 Noches", 
+                                                      "De 15 a 28 Noches", 
+                                                      "De 29 a 364 Noches"),
+                                           ordered = TRUE))
+# Eliminar NAs en el gasto FIN
+EGYPV2016NRF<- EGYPV2016NRF[!is.na(EGYPV2016NRF$GastoFin), ]
+EGYPV2016NRF <- EGYPV2016NRF[!is.na(EGYPV2016NRF$P10_3NumNoch),]
+table(is.na(EGYPV2016NRF$P10_3NumNoch))
 
+# Eliminar registros sin gasto (0 o negativos)
+EGYPV2016NRF <- subset(EGYPV2016NRF, GastoFin > 0)
+EGYPV2016NRF <- subset(EGYPV2016NRF, P10_3NumNoch > 0)
+EGYPV2016NRF <- subset(EGYPV2016NRF, !is.na(Procedencia))
+###Creacion de grugasto2
+EGYPV2016NRF$grugasto2 <- cut(EGYPV2016NRF$GastoFin,
+                              breaks = quantile(EGYPV2016NRF$GastoFin, probs = seq(0, 1, 1/3), na.rm = TRUE),
+                              include.lowest = TRUE,
+                              labels = c("Gasto Bajo", "Gasto Medio", "Gasto Alto"))
 
+table(EGYPV2016NRF$grugasto2)
 
+### Base Final
+EGYPV2016REG <- subset(EGYPV2016NRF, select = c(Validas,Mes,Trimestre,CodResOMT.1,Procedencia,Ciudad1, Zona1, 
+                                                Grugasto, GastoTotalXPers, GastoFin, GastoTotalXPersXDia,grugasto2, 
+                                                P9_NumPers, GruViaje, gruviaje,P10_3NumNoch, GruNoch, grunoche, 
+                                                CodPrimVisita, PrimeraVisita, P11_THoteles, Hotel, HotelUso, 
+                                                P11_TAmigos, Amigos, AmigosUso, P11_TAlojP, CasaP, CasaPUso,
+                                                CodIngreso,CodOcupa,CodEduca, CodEstCivil, CodTipMot, CodModViaje,
+                                                P28_Total,ViaEnt,P11_TotNoches))
+                                                
 
+## Conversión del Gasto Fin a escala Logarítmica
+GastoTotal= EGYPV2016REG$GastoFin
+LogGTN = na.exclude(log(GastoTotal))
 
+#### Base Final para realize la regression 
 
+glevels1 = factor(EGYPV2016REG$Zona1)
+glevels2 = factor(EGYPV2016REG$Procedencia)
+table(glevels1)
+table(glevels2)
+gl1 = as.numeric(glevels1[!is.na(log(GastoTotal))])
+gl2 = as.numeric(glevels2[!is.na(log(GastoTotal))])
 
+## Niveles combinados
+glevels3 = factor(paste(EGYPV2016REG$Zona1,EGYPV2016REG$Procedencia))
+table(glevels3)
+gl3 = as.numeric(glevels3[!is.na(log(GastoTotal))])
+gl3
 
-save.image("~/Documents/Modelos_Multinivel/Datos/Datos2016.RData")
+## Variables para la regression
+NumNoches=as.numeric(EGYPV2016REG$P10_3NumNoch)
+NumPersonas=as.numeric(EGYPV2016REG$P9_NumPers)
+
+# setwd("Modelos_Multinivel/Datos")
+save.image("~/Documents/Github/Modelos_Multinivel/Datos/DatosRegresion2016.RData")
+rm(list = ls())
