@@ -72,6 +72,26 @@ fitMLinealGAM2<- brm(
 summary(fitMLinealGAM2)
 mcmc_trace(fitMLinealGAM2)
 mcmc_dens(fitMLinealGAM2)
-loo_compare(loo(fitglobal),loo(fitGlineal),loo(fitMLineal),loo(fitMLinealGAM),loo(fitMLinealGAM2))
 
+fitGlineal1<- brm(
+  bf(log(GastoFin) ~ P10_3NumNoch + P9_NumPers + gruviaje + Hotel + Amigos + CasaP,
+     alpha ~ 1),
+  data = EGYPV2016REG,
+  family = skew_normal(),
+  prior  = c(
+    prior(normal(0, 10), class = "Intercept"),   # mu ~ N(0,10)
+    prior(normal(0, 5), class = "b"),   # mu ~ N(0,5)
+    prior(student_t(3, 0, 1), class = "sigma"),  # sigma ~ t(3,0,1)
+    prior(normal(0, 1), class = "Intercept", dpar = "alpha")  # alpha ~ N(0,1))
+  ),
+  chains = 4, iter = 4000, warmup = 1000,
+)
+
+summary(fitGlineal1)
+mcmc_trace(fitGlineal1)
+mcmc_dens(fitGlineal1)
+
+loo_compare(loo(fitglobal),loo(fitGlineal),loo(fitMLineal),loo(fitMLinealGAM),loo(fitMLinealGAM2),loo(fitGLineal1))
+loo(fitGlineal1)
+loo_compare(loo(fitglobal),loo(fitGlineal),loo(fitMLineal),loo(fitMLinealGAM),loo(fitMLinealGAM2),loo(fitGlineal1))
 
