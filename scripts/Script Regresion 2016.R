@@ -94,4 +94,15 @@ mcmc_dens(fitGlineal1)
 loo_compare(loo(fitglobal),loo(fitGlineal),loo(fitMLineal),loo(fitMLinealGAM),loo(fitMLinealGAM2),loo(fitGLineal1))
 loo(fitGlineal1)
 loo_compare(loo(fitglobal),loo(fitGlineal),loo(fitMLineal),loo(fitMLinealGAM),loo(fitMLinealGAM2),loo(fitGlineal1))
+vars <- data.frame(
+  Noches = EGYPV2016REG$P10_3NumNoch,
+  Hotel = as.numeric(EGYPV2016REG$Hotel),
+  Amigos = as.numeric(EGYPV2016REG$Amigos),
+  CasaP = as.numeric(EGYPV2016REG$CasaP),
+  gruviaje = as.numeric(EGYPV2016REG$gruviaje)
+)
+
+round(cor(vars), 2)
+library(corrplot)
+corrplot(cor(vars), method = "color", type = "upper", tl.col = "black")
 
