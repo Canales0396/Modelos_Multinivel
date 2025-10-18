@@ -301,3 +301,141 @@ NumPersonas=as.numeric(EGYPV2016REG$P9_NumPers)
 # setwd("Modelos_Multinivel/Datos")
 save.image("~/Documents/Github/Modelos_Multinivel/Datos/DatosRegresion2016.RData")
 rm(list = ls())
+
+
+#####################################################################################
+#               Datos Regresion para el 2021
+#####################################################################################
+ECV2021R <- read.spss("~/Documents/Github/Modelos_Multinivel/Datos/Base de la ECV 2021Completa.sav")
+ECV2021R <- data.frame(ECV2021R)
+ECV2021R$P04.1 = as.character(ECV2021R$P04)
+
+## Procedencia
+ECV2021R$Procedencia <- "Proce"
+
+ECV2021R$Procedencia[ECV2021R$P04.1 %in% c("Estados Unidos de América",
+                                  "México","Canadá")]  <- "Norteamérica"
+
+ECV2021R$Procedencia[ECV2021R$P04.1 %in% c("El Salvador", "Guatemala", "Nicaragua", "Costa Rica",
+                                  "Panamá", "Belice")]  <- "Centroamérica"
+
+ECV2021R$Procedencia[ECV2021R$P04.1 %in% c("Colombia", "Brasil", "Ecuador", "Argentina", "Perú", "Uruguay",
+                                  "Bolivia", "Paraguay", "Chile")] <- "Suramérica"
+
+ECV2021R$Procedencia[ECV2021R$P04.1 %in% c("Islas Caimán", "República Dominicana", 
+                                  "Puerto Rico","Cuba")]  <- "Caribe"
+
+ECV2021R$Procedencia[ECV2021R$P04.1 %in% c("España", "Alemania", "Francia", "Italia", "Suiza", "Reino Unido" , 
+                                  "Países Bajos", "Polonia", "Portugal", "República Checa", "Grecia" ,
+                                  "Lituania", "Eslovenia", "Austria", "Dinamarca" , "Irlanda", "Noruega",
+                                  "Ucrania", "Bélgica","Israel", "Turquía", "Rusia (Federación de)","Nueva Zelanda")]  <- "Europa"
+
+#ECV2021$zona[ECV2021$P04.1 %in% c("Israel", "Turquía", "Rusia (Federación de)")] 
+####<- "Resto del Mundo"
+
+ECV2021R$P11_1Hotel[is.na(ECV2021R$P11_1Hotel)] <- 0
+ECV2021R$P11_1Amigos[is.na(ECV2021R$P11_1Amigos)] <- 0
+ECV2021R$P11_1CasaP[is.na(ECV2021R$P11_1CasaP)] <- 0
+
+## Filtrado solo para los datos de Gasto y Perfil
+ECV2021NR<- subset(ECV2021R,Validas == "Gasto y Perfil")
+## Filtrado solo para todas las zona menos la desconocida, igual para procedencia 
+
+ECV2021NR <- subset(ECV2021NR, 
+                       Procedencia %in% c("Norteamérica", "Centroamérica", "Suramérica", "Europa", "Caribe") &
+                         P11_Zona1 %in% c("Zona Centro", "Zona Insular", "Zona Norte", "Zona Occidental", "Zona Oriental", "Zona Sur"))
+
+#Creaciacion de variables para hacer el modelo
+
+#Creacion de variables para identificar si uso hotel o no
+ECV2021NR$Hotel<- ifelse(is.na(ECV2021NR$P11_1Hotel), NA,
+                            ifelse(ECV2021NR$P11_1Hotel > 0, 1, 0))
+#Creacion de variables para identificar si uso casa de amigos
+ECV2021NR$Amigos<- ifelse(is.na(ECV2021NR$P11_1Amigos), NA,
+                             ifelse(ECV2021NR$P11_1Amigos > 0, 1, 0))
+#Creacion de variables para identificar si uso hotel o no
+ECV2021NR$CasaP <- ifelse(is.na(ECV2021NR$P11_1CasaP), NA,
+                             ifelse(ECV2021NR$P11_1CasaP > 0, 1, 0))
+
+ECV2021NR$Uso_Hotel  <- factor(ifelse(ECV2021NR$Hotel == 1, "Sí",
+                                        ifelse(ECV2021NR$Hotel == 0, "No", NA)),
+                                 levels = c("No", "Sí"))
+
+ECV2021NR$Uso_Amigos <- factor(ifelse(ECV2021NR$Amigos  == 1, "Sí",
+                                        ifelse(ECV2021NR$Amigos == 0, "No", NA)),
+                                 levels = c("No", "Sí"))
+
+ECV2021NR$Uso_CasaP <- factor(ifelse(ECV2021NR$CasaP == 1, "Sí",
+                                        ifelse(ECV2021NR$CasaP == 0, "No", NA)),
+                                 levels = c("No", "Sí"))
+
+
+ECV2021NR$gruviaje<- as.numeric(factor(ECV2021NR$gruviaje,
+                                          levels = c("Viaja solo", "Con su pareja", "En familia", "En grupo")))
+ECV2021NR$PrimeraVezHonduras<- as.numeric(factor(ECV2021NR$PrimeraVezHonduras,
+                                               levels = c("Si", "No")))
+ECV2021NR$IngresoFamiliar <- as.numeric(factor(ECV2021NR$IngresoFamiliar,
+                                                  levels = c("US$ 5,000 o menos", 
+                                                             "De US$ 5,001 a US$ 10,000", 
+                                                             "De US$ 10,001 a US$ 20,000",
+                                                             "De US$ 20,001 a US$ 30,000",
+                                                             "De US$ 30,001 a US$ 50,000",
+                                                             "De US$ 50,001 a US$ 70,000",
+                                                             "De US$ 70,001 o más",
+                                                             "No Responde"),
+                                                  ordered = TRUE))
+
+ECV2021NR$PuestoTrabajo <- as.numeric(factor(ECV2021NR$PuestoTrabajo,
+                                                levels = c("Ama de Casa", "Desempleado", "Estudiante", "Jubilado",
+                                                           "Operario, artesano u otro oficio", "Otro", "No Responde",
+                                                           "Trabajador de servicios o vendedor", "Trabajador de servicios y vendedor",
+                                                           "Personal de apoyo administrativo", "Técnico o profesional de nivel medio",
+                                                           "Profesional", "Director o Gerente")))
+
+# Eliminar NAs en el gasto FIN
+ECV2021NR<- ECV2021NR[!is.na(ECV2021NR$PGastoTotal), ]
+ECV2021NR <- ECV2021NR[!is.na(ECV2021NR$P10D),]
+table(is.na(ECV2021NR$P10D))
+
+# Eliminar registros sin gasto (0 o negativos)
+ECV2021NR <- ECV2021NR[ECV2021NR$PGastoTotal > 0, ]
+ECV2021NR <- ECV2021NR[ECV2021NR$P10D > 0, ]
+ECV2021NR <- subset(ECV2021NR, !is.na(Procedencia))
+ECV2021NR <- subset(ECV2021NR, P11_Zona1 != "Desconocido")
+
+### Base Final
+ECV2021REG <- subset(ECV2021NR, select = c(Validas, Mes, Trimestre, Procedencia, CodCiuRes,
+                                                    P04_RegionVA, P04_RegionVF, P10A, P10D, P11_Zona1,
+                                                    GruGasto, PGastoTotal, TipVisitante, Hotel,Uso_Hotel , Amigos,Uso_Amigos,
+                                                    CasaP,Uso_CasaP, Ninguno,NumeroPersonas,gruviaje,IngresoFamiliar, 
+                                                    MotivoViaje, P11_1Hotel,P11_1Amigos, P11_1CasaP,PuestoTrabajo))
+
+
+ECV2021REG $Hotel[is.na(ECV2021REG $Hotel)] <- 0
+ECV2021REG $Amigos[is.na(ECV2021REG $Amigos)] <- 0
+ECV2021REG $CasaP[is.na(ECV2021REG $CasaP)] <- 0
+ECV2021REG $Ninguno[is.na(ECV2021REG $Ninguno)] <- 0
+## Conversión del Gasto Fin a escala Logarítmica
+
+## Conversión del Gasto Fin a escala Logarítmica
+GastoTotal= ECV2021REG$PGastoTotal
+LogGTN = na.exclude(log(GastoTotal))
+
+glevels1 = factor(ECV2021REG$P11_Zona1)
+glevels2 = factor(ECV2021REG$Procedencia)
+table(glevels1)
+table(glevels2)
+
+gl1 = as.numeric(glevels1[!is.na(log(GastoTotal))])
+gl2 = as.numeric(glevels2[!is.na(log(GastoTotal))])
+
+## Niveles combinados
+glevels3 = factor(paste(ECV2021REG$P11_Zona1,ECV2021REG$Procedencia))
+table(glevels3)
+gl3 = as.numeric(glevels3[!is.na(log(GastoTotal))])
+gl3
+
+# setwd("Modelos_Multinivel/Datos")
+save.image("~/Documents/Github/Modelos_Multinivel/Datos/DatosRegresion2021.RData")
+rm(list = ls())
+
