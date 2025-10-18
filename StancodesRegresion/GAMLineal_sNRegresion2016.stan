@@ -4,9 +4,9 @@ data {
   array[n] int<lower=1, upper=J> group; // grupo (zona o procedencia)
   vector[n] y;          // variable respuesta (log gasto)
   int<lower=1> Kb;      // Number de bases spline
-  int<lower=1> Kw;     // Number de covariables lineales (incluye intercepto)
+  int<lower=1> Kx;     // Number de covariables lineales (incluye intercepto)
   matrix[n, Kb] B;    // Number de bases spline (Noches)
-  matrix[n, Kw] W;    // Number de covariables lineales
+  matrix[n, Kx] W;    // Number de covariables lineales
 }
 parameters {
   real mu;                // nivel global
@@ -15,7 +15,7 @@ parameters {
   real<lower=0> sigma;        // desviación global
   
   // parámetros del GAM lineal
-  vector[Kw] beta;              // efectos fijos (Hotel, Amigos, etc.)
+  vector[Kx] beta;              // efectos fijos (Hotel, Amigos, etc.)
   vector[Kb] b_s;               // coeficientes spline
   real<lower=0> tau_s;          // suavizado spline
 }

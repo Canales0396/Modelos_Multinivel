@@ -29,34 +29,44 @@ sm2 <- cmdstan_model("~/Documents/GitHub/Modelos_Multinivel/StancodesRegresion/G
 # La lista de datos que Stan necesita para hacer mcmc
 ### Base Spines MATRIZ DE DISEÑO
 matriz_X <- model.matrix(~ P10_3NumNoch + gruviaje + Hotel + Amigos + CasaP, data = EGYPV2016REG)
+matriz_X_1 <- model.matrix(~ P10_3NumNoch + gruviaje + Hotel + CasaP, data = EGYPV2016REG)
 B <- bs(EGYPV2016REG$P10_3NumNoch)
 W_lin <- model.matrix(~ gruviaje + Hotel + Amigos + CasaP, data = EGYPV2016REG)
+W_lin <- W_lin[,-1]
 
+W_lin1 <- model.matrix(~ gruviaje + Hotel + CasaP, data = EGYPV2016REG)
+W_lin1 <- W_lin1[,-1]
 ##Lista de datos para los modelos lineales Skew_Normal
 d1 <- list(n = nrow(matriz_X), K = ncol(matriz_X),X = matriz_X,y = GastoTotal)
 d1_log <- list(n = nrow(matriz_X),K = ncol(matriz_X) , X = matriz_X, y = LogGTN)
+d1_log_1 <- list(n = nrow(matriz_X_1),K = ncol(matriz_X_1) , X = matriz_X_1, y = LogGTN)
 
 ##Lista de datos para GAM LINEAL GLOBAL Skew_Normal
-d2_log_1 <- list(n = length(LogGTN), J = 1,group = rep (1L,length(LogGTN)),y=LogGTN,Kb=ncol(B),Kw=ncol(W_lin),B=B,W=W_lin)
+d2_log_1 <- list(n = length(LogGTN), J = 1,group = rep (1L,length(LogGTN)),y=LogGTN,Kb=ncol(B),Kx=ncol(W_lin),B=B,W=W_lin)
+d2_log_1_1 <- list(n = length(LogGTN), J = 1,group = rep (1L,length(LogGTN)),y=LogGTN,Kb=ncol(B),Kx=ncol(W_lin1),B=B,W=W_lin1)
 
 ### Multinivel Lineal
+dL_log_sc <- list(n = length(LogGTN),J = 26, group = gl3,y = LogGTN,K = 1, X=matriz_X[,1])
 dL_log_1 <- list(n = length(LogGTN),J = 6, group = gl1,y = LogGTN,K = ncol(W_lin), X=W_lin)
 dL_log_2 <- list(n = length(LogGTN), J = 5,  group = gl2, y = LogGTN, K = ncol(W_lin),  X = W_lin)
 dL_log_3 <- list(n = length(LogGTN), J = 26, group = gl3, y = LogGTN, K = ncol(W_lin),  X = W_lin)
 ## GAM No lineal Multinivel
-d2_log_2 <- list(n = length(LogGTN), J = 6,  group = gl1, y = LogGTN, Kb = ncol(B),   Kw = ncol(W_lin), B = B, W = W_lin)
-d2_log_3 <- list(n = length(LogGTN), J = 5,  group = gl2, y = LogGTN, Kb = ncol(B),   Kw = ncol(W_lin), B = B, W = W_lin)
-d3_log   <- list(n = length(LogGTN), J = 26, group = gl3, y = LogGTN, Kb = ncol(B),   Kw = ncol(W_lin), B = B, W = W_lin)
+d2_log_2 <- list(n = length(LogGTN), J = 6,  group = gl1, y = LogGTN, Kb = ncol(B),   Kx = ncol(W_lin), B = B, W = W_lin)
+d2_log_3 <- list(n = length(LogGTN), J = 5,  group = gl2, y = LogGTN, Kb = ncol(B),   Kx = ncol(W_lin), B = B, W = W_lin)
+d3_log   <- list(n = length(LogGTN), J = 26, group = gl3, y = LogGTN, Kb = ncol(B),   Kx = ncol(W_lin), B = B, W = W_lin)
 
 
 ## 1) Lineales globales
 fit1   <- sm1$sample(data = d1,     chains = 4, parallel_chains = 4, refresh = 500)  # Global (real)
 fit1.1 <- sm1$sample(data = d1_log, chains = 4, parallel_chains = 4, refresh = 500)  # Global (log)
-
+fit1.1.1 <- sm1$sample(data = d1_log_1, chains = 4, parallel_chains = 4, refresh = 500)  # Global (log)
+fitsc.1 <- sm1$sample(data = d1_log_11, chains = 4, parallel_chains = 4, refresh = 500)  # Global (log)
 ## 2) GAM lineal (global)
 fit2.1 <- sm2$sample(data = d2_log_1, chains = 4, parallel_chains = 4, refresh = 500)
+fit2.1.1 <- sm2$sample(data = d2_log_1_1, chains = 4, parallel_chains = 4, refresh = 500) # Sin Amigo
 
 ## 3) Lineales multinivel (sin spline)
+fitL2.1sc <- sm1$sample(data = dL_log_sc, chains = 4, parallel_chains = 4, refresh = 500) # Zona
 fitL2.1 <- sm1$sample(data = dL_log_1, chains = 4, parallel_chains = 4, refresh = 500) # Zona
 fitL2.2 <- sm1$sample(data = dL_log_2, chains = 4, parallel_chains = 4, refresh = 500) # Procedencia
 fitL2.3 <- sm1$sample(data = dL_log_3, chains = 4, parallel_chains = 4, refresh = 500) # Zona-Proce
@@ -77,14 +87,21 @@ loo_final <- loo_compare(
   fit2.2$loo(),  # Modelo 4: GAM Multinivel (Zona)
   fit2.3$loo(),  # Modelo 5: GAM Multinivel (Procedencia)
   fit2.4$loo(),   # Modelo 6: GAM Multinivel (Zona-Procedencia)
-  fitL2.1$loo(),  # Modelo 3: LINEAL MULTINIVEL Global (log)
-  fitL2.2$loo(),  # Modelo 4: LINEAL  Multinivel (Zona)
-  fitL2.3$loo()  # Modelo 5: LINEAL Multinivel (Procedencia)
+  fitL2.1$loo(),  # Modelo 7: LINEAL MULTINIVEL Global (log)
+  fitL2.2$loo(),  # Modelo 8: LINEAL  Multinivel (Zona)
+  fitL2.3$loo()  # Modelo 9: LINEAL Multinivel (Procedencia)
 )
 
 print(loo_final, simplify = FALSE)
 xtable(print(loo_final, simplify = FALSE, digits = 2))
 fit1$summary()
+
+loo_final_2<-loo_compare(
+  
+  fit2.1$loo(),
+  fit2.1.1$loo()
+)
+print(loo_final_2, simplify = FALSE)
 
 #################################################################################
 ##        Análisis de parámetros del modelo de regresión skew-normal lineal
