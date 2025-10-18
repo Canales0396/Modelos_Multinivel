@@ -66,5 +66,13 @@ fit2.1 <- sm2$sample(data = dL_log_1,  chains = 4, parallel_chains = 4, refresh 
 fit2.2 <- sm2$sample(data = dL_log_2,  chains = 4, parallel_chains = 4, refresh = 500)  # multinivel por procedencia (con covariables)
 fit2.3 <- sm2$sample(data = dL_log_3,  chains = 4, parallel_chains = 4, refresh = 500)  # mod zon proc 
 
+loo_multi<- loo_compare(
+  fit2$loo(),    # Modelo 1: MultiLineal Global 
+  fit2.1$loo(),  # Modelo 2: Modelo : Multinivel Zona -con covariables 
+  fit2.2$loo(),  # Modelo 3: Modelo : Multinivel proce -con covariables
+  fit2.3$loo()  # Modelo 3: Modelo : Multinivel proce -con covariables
+)
+print(loo_multi, simplify = FALSE)
+xtable(print(loo_multi, simplify = FALSE, digits = 2))
 
 
