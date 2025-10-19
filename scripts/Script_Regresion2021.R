@@ -39,7 +39,7 @@ d1_log_2=list(n = length(LogGTN), J = 1, group = rep(1, length(LogGTN)), y = Log
 
 ## Lista datos multinivel skew-nomal
 
-dL_log_sc <- list(n = nrow(matriz_X), J = 29, group = gl3, y = LogGTN, K = ncol(matriz_X[, 1, drop = FALSE]), X = matriz_X[, 1, drop = FALSE]);
+dL_log_sc <- list(n = nrow(matriz_X), J = 29, group = gl3, y = LogGTN, K = 0, X = array(dim = c(nrow(matriz_X),0)) );
 dL_log_1  <- list(n = nrow(matriz_X), J = 6,  group = gl1, y = LogGTN, K = ncol(matriz_X), X = matriz_X);
 dL_log_2  <- list(n = nrow(matriz_X), J = 5,  group = gl2, y = LogGTN, K = ncol(matriz_X), X = matriz_X);
 dL_log_3  <- list(n = nrow(matriz_X), J = 29, group = gl3, y = LogGTN, K = ncol(matriz_X), X = matriz_X);
