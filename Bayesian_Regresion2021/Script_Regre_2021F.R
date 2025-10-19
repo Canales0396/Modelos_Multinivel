@@ -11,8 +11,8 @@ library(splines)
 library(bayesplot)
 library(cowplot)
 
-
-load("~/Documents/GitHub/Modelos_Multinivel/Datos/DatosRegresionV22021.RData")
+load("~/Documents/GitHub/Modelos_Multinivel/Datos/DatosRegresion2016.RData")
+#load("~/Documents/GitHub/Modelos_Multinivel/Datos/DatosRegresionV22021.RData")
 compute_loo <- function(stan_file_path = NULL, data_list = NULL){
   sm <- cmdstan_model(stan_file_path)
   fit <- sm$sample(data = data_list, chains = 4, 
@@ -32,16 +32,17 @@ sm1 <- cmdstan_model("~/Documents/GitHub/Modelos_Multinivel/StancodesRegresion/S
 
 ### Matrix de diseño de las covariables
 # Transformar y escalar
-ECV2021REG$P10D_std <- scale(log1p(ECV2021REG$P10D))
+#ECV2021REG$P10D_std <- scale(log1p(ECV2021REG$P10D))
 
 # Crear matriz sin intercepto
 matriz_X <- model.matrix(~ 0 + P10D_std + gruviaje + Hotel + Amigos + CasaP, data = ECV2021REG)
+#matriz_X<- model.matrix(~ 0 + P10_3NumNoch + gruviaje + Hotel + Amigos + CasaP, data = EGYPV2016REG)
 #matriz_X <- model.matrix(~ 0 + P10D + gruviaje + Hotel + Amigos + CasaP, data = ECV2021REG)
-matriz_X_1 <- model.matrix(~ 0 + P10D_std + gruviaje + Hotel + CasaP, data = ECV2021REG) #Amigos 
+matriz_X_1 <- model.matrix(~ 0 + P10_3NumNoch + gruviaje + Hotel + CasaP, data = EGYPV2016REG) #Amigos 
 
 ## Lista de datos multinivel Skew-Normal (modelo lineal)
 
-dL_log_sc <- list(n = length(LogGTN), J = 1,  group = rep(1, length(LogGTN)), y = LogGTN, K = 0, X = matrix(0, nrow = length(LogGTN), ncol = 0))
+dL_log_sc <- list(n = length(LogGTN), J = 22,  group = gl3, y = LogGTN, K = 0, X = array(,dim = c(length(LogGTN),0)))
 dL_log_1  <- list(n = length(LogGTN), J = 6,  group = gl1, y = LogGTN, K = ncol(matriz_X),   X = matriz_X)
 dL_log_2  <- list(n = length(LogGTN), J = 5,  group = gl2, y = LogGTN, K = ncol(matriz_X),   X = matriz_X)
 dL_log_3  <- list(n = length(LogGTN), J = 22, group = gl3, y = LogGTN, K = ncol(matriz_X),   X = matriz_X)
@@ -75,6 +76,15 @@ loo_fit <- loo(fit2.3$draws("log_lik"))
 bad_obs <- which(loo_fit$diagnostics$pareto_k > 0.7)
 bad_obs
 
+# Extraer cadenas MCMC de los parámetros principales
+fv2 <- fit2$draws(variables = c("mu", "mu_group", "alpha", "sigma"),
+                   format = "draws_matrix")
+
+# Resumir las cadenas (media, sd, rhat, ESS, etc.)
+resumen_fv2 <- summarize_draws(fv2)
+print(resumen_fv2, n = 10)
+tabla_fv2 <- xtable(resumen_fv2, digits = 2)
+print(tabla_fv2, include.rownames = FALSE)
 
 ##Trazas y densdides
 
@@ -91,7 +101,7 @@ for (i in seq(1, 22, by = 6)) {
 
 # modelo multinivel log normal
 sple = sample(1:4000,500)
-yrep = fit2.3$draws(variables = c("y_rep"),format = "matrix")
+yrep = fit2$draws(variables = c("y_rep"),format = "matrix")
 
 niveles_validos <- setdiff(levels(glevels3),1)
 n_glevels3<-factor(glevels3, levels = niveles_validos)
