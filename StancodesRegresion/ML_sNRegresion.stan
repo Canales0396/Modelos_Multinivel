@@ -16,8 +16,8 @@ parameters {
 model {
   vector[n] mu_pred;  // Predictor del modelo Linealcon covriables
   // priors
-  if (K > 0)
-  beta ~ normal(0, 10);      //prior debil sobre los coeficiente de las covariables
+  if (K > 0) beta ~ normal(0, 10);      //prior debil sobre los coeficiente de las covariables
+  
   mu ~ normal(0, 10);
   mu_group ~ normal(mu, 1);
   sigma ~ student_t(3, 0, 1);
@@ -25,8 +25,8 @@ model {
   
   // Predictictor lineal con las covariables
    mu_pred = mu_group[group];
-   if (K > 0)
-   mu_pred += X * beta;
+   
+   if (K > 0) mu_pred += X * beta;
   
   //likelihood normal multinivel
   y ~ skew_normal(mu_pred, sigma, alpha[group]);
@@ -37,7 +37,7 @@ generated quantities{
   vector[n] log_lik;
    mu_pred = mu_group[group];
    if (K > 0)
-   mu_pred += X * beta;
+     mu_pred += X * beta;
   
  for(i in 1:n){
     y_rep[i] = skew_normal_rng(mu_pred[i], sigma, alpha[group[i]]);

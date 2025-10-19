@@ -13,15 +13,16 @@ model {
   vector[n] mu;  // Predictor del modelo Lineal
   
   if (K > 0)
-  mu = X * beta;   // modelo con covariables
+    mu = X * beta;   // modelo con covariables
   else
-  mu = rep_vector(0, n); // modelo nulo sin covariables
+    mu = rep_vector(0, n); // modelo nulo sin covariables
   
   // priors
-  if (K > 0)
-  beta ~ normal(0, 10);      //prior debil sobre los coeficiente de las covariables
+  if (K > 0) beta ~ normal(0, 10);      //prior debil sobre los coeficiente de las covariables
+  
   sigma ~ student_t(3, 0, 1); //prior sobre la desviacion.
-  //alpha ~ normal(0,1);   // Prior sobre la simetria 
+  alpha ~ normal(0,1);   // Prior sobre la simetria 
+  
   
   //likelihood
   y ~ skew_normal(mu, sigma, alpha);
@@ -31,10 +32,10 @@ generated quantities{
   vector[n] y_rep; 
   vector[n] log_lik;
   
-  if (K > 0)
-  mu = X * beta;  
+  if (K > 0) 
+    mu = X * beta;  
   else
-  mu = rep_vector(0, n); 
+    mu = rep_vector(0, n); 
   
  for(i in 1:n){
     y_rep[i] = skew_normal_rng(mu[i], sigma, alpha);
