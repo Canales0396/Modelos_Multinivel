@@ -346,7 +346,7 @@ ECV2021NR <- subset(ECV2021NR,
                          P11_Zona1 %in% c("Zona Centro", "Zona Insular", "Zona Norte", "Zona Occidental", "Zona Oriental", "Zona Sur"))
 
 #Creaciacion de variables para hacer el modelo
-
+ECV2021NR <- subset(ECV2021NR, P11_Zona1 != "Desconocido")
 #Creacion de variables para identificar si uso hotel o no
 ECV2021NR$Hotel<- ifelse(is.na(ECV2021NR$P11_1Hotel), NA,
                             ifelse(ECV2021NR$P11_1Hotel > 0, 1, 0))
@@ -434,8 +434,47 @@ glevels3 = factor(paste(ECV2021REG$P11_Zona1,ECV2021REG$Procedencia))
 table(glevels3)
 gl3 = as.numeric(glevels3[!is.na(log(GastoTotal))])
 gl3
+save.image("~/Documents/Github/Modelos_Multinivel/Datos/DatosRegresion2021.RData")
+## Dejar solo lo niveles ue tengan ms datos para evitar problemas del modelo
+ECV2021REG$glevels1<-glevels1
+ECV2021REG$glevels2<-glevels2
+ECV2021REG$glevels3<-glevels3
+
+#onteo de grupos
+
+conteos<-ECV2021REG %>%
+  group_by(glevels3)%>%
+  summarise(n=n())%>%
+  arrange(desc(n))
+
+grup_validos<-conteos%>%
+  filter(n >=10) %>%
+  pull(glevels3)
+
+
+
+ECV2021REG <- ECV2021REG %>%
+  filter(glevels3 %in% grup_validos)
+
+## Conversión del Gasto Fin a escala Logarítmica con los nuevos grupos
+GastoTotal= ECV2021REG$PGastoTotal
+LogGTN = na.exclude(log(GastoTotal))
+
+glevels1 = factor(ECV2021REG$P11_Zona1)
+glevels2 = factor(ECV2021REG$Procedencia)
+table(glevels1)
+table(glevels2)
+
+gl1 = as.numeric(glevels1[!is.na(log(GastoTotal))])
+gl2 = as.numeric(glevels2[!is.na(log(GastoTotal))])
+
+## Niveles combinados
+glevels3 = factor(paste(ECV2021REG$P11_Zona1,ECV2021REG$Procedencia))
+table(glevels3)
+gl3 = as.numeric(glevels3[!is.na(log(GastoTotal))])
+gl3
 
 # setwd("Modelos_Multinivel/Datos")
-save.image("~/Documents/Github/Modelos_Multinivel/Datos/DatosRegresion2021.RData")
+save.image("~/Documents/Github/Modelos_Multinivel/Datos/DatosRegresionV22021.RData")
 rm(list = ls())
 

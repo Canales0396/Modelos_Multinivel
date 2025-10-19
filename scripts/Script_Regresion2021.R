@@ -35,6 +35,7 @@ matriz_X_1 <- model.matrix(~ P10D + gruviaje + Hotel + Amigos + CasaP, data = EC
 d1_log <- list(n = nrow(matriz_X), K = ncol(matriz_X) , X = matriz_X, y = LogGTN) # con amigos
 d1_log_1 <- list(n = nrow(matriz_X_1),K = ncol(matriz_X_1) , X = matriz_X_1, y = LogGTN) # sin amigos
 d1_log_2 <- list(n = nrow(matriz_X),K = 0, X = matrix(0, nrow(matriz_X), 0), y = LogGTN) # Nulo Global
+d1_log_2=list(n = length(LogGTN), J = 1, group = rep(1, length(LogGTN)), y = LogGTN)
 
 ## Lista datos multinivel skew-nomal
 

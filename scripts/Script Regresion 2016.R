@@ -106,3 +106,21 @@ round(cor(vars), 2)
 library(corrplot)
 corrplot(cor(vars), method = "color", type = "upper", tl.col = "black")
 
+ECV2021REG$Zona_Procedencia <- interaction(ECV2021REG$P11_Zona1, ECV2021REG$Procedencia, sep = "_")
+
+library(brms)
+
+fit_skew_hier <- brm(
+  formula = log(PGastoTotal) ~ 1 + P10D + gruviaje + Hotel + Amigos + CasaP +
+    (1 + P10D + gruviaje + Hotel + Amigos + CasaP | Zona_Procedencia),
+  family = skew_normal(),
+  data = ECV2021REG,
+  chains = 4,
+  iter = 4000,
+  warmup = 2000,
+  cores = 4,
+  backend = "cmdstanr",
+  control = list(adapt_delta = 0.99, max_treedepth = 15),
+  save_pars = save_pars(all = TRUE)
+)
+
